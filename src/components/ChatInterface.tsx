@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Loader2, ArrowLeft, FileText, ClipboardList, FileDown } from "lucide-react";
+import { Send, Loader2, ArrowLeft, FileText, ClipboardList, FileDown, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import FileUpload from "./FileUpload";
 import ComplianceChecklist from "./ComplianceChecklist";
+import VoiceRecorder from "./VoiceRecorder";
 
 interface Message {
   role: "user" | "assistant";
@@ -25,6 +26,7 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
   const [documentContent, setDocumentContent] = useState<string>("");
   const [showChecklist, setShowChecklist] = useState(false);
   const [checklistItems, setChecklistItems] = useState<any[]>([]);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -284,6 +286,53 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
     }
   };
 
+  const handleVoiceTranscription = (text: string) => {
+    setInput(text);
+  };
+
+  const handleTextToSpeech = async (text: string) => {
+    setIsSpeaking(true);
+    try {
+      const TTS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/text-to-speech`;
+      const response = await fetch(TTS_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({ text, voice: "Sarah" }),
+      });
+
+      if (!response.ok) throw new Error("Failed to generate speech");
+
+      const data = await response.json();
+      const audioData = atob(data.audioContent);
+      const audioArray = new Uint8Array(audioData.length);
+      for (let i = 0; i < audioData.length; i++) {
+        audioArray[i] = audioData.charCodeAt(i);
+      }
+
+      const audioBlob = new Blob([audioArray], { type: "audio/mpeg" });
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      
+      audio.onended = () => {
+        setIsSpeaking(false);
+        URL.revokeObjectURL(audioUrl);
+      };
+      
+      await audio.play();
+    } catch (error) {
+      console.error("TTS error:", error);
+      setIsSpeaking(false);
+      toast({
+        title: "Speech Error",
+        description: "Failed to generate speech. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
@@ -370,8 +419,8 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
                 <div
                   className={`max-w-[80%] rounded-2xl px-4 py-3 ${
                     msg.role === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-foreground"
+                      ? "bg-gradient-to-r from-primary to-primary-glow text-primary-foreground shadow-strong"
+                      : "glass-effect text-foreground border border-primary/20"
                   }`}
                 >
                   {msg.documentName && (
@@ -380,7 +429,20 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
                       <span>{msg.documentName}</span>
                     </div>
                   )}
-                  <p className="whitespace-pre-wrap text-sm leading-relaxed">{msg.content}</p>
+                  <div className="flex items-start gap-2">
+                    <p className="whitespace-pre-wrap text-sm leading-relaxed flex-1">{msg.content}</p>
+                    {msg.role === "assistant" && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 shrink-0"
+                        onClick={() => handleTextToSpeech(msg.content)}
+                        disabled={isSpeaking}
+                      >
+                        <Volume2 className={`h-3 w-3 ${isSpeaking ? "animate-pulse text-primary" : ""}`} />
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
@@ -397,7 +459,7 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
       </ScrollArea>
 
       {/* Input */}
-      <div className="border-t bg-card shadow-soft">
+      <div className="border-t bg-card shadow-strong court-pillar">
         <div className="container mx-auto max-w-4xl px-4 py-4">
           <form onSubmit={handleSubmit} className="flex gap-2">
             <FileUpload
@@ -406,14 +468,18 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
               selectedFile={selectedFile}
               disabled={isLoading}
             />
+            <VoiceRecorder
+              onTranscription={handleVoiceTranscription}
+              disabled={isLoading}
+            />
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask a legal question or upload a document..."
+              placeholder="Ask a legal question, speak, or upload a document..."
               disabled={isLoading}
-              className="flex-1"
+              className="flex-1 bg-input border-primary/20 focus:border-primary"
             />
-            <Button type="submit" disabled={isLoading || !input.trim()} size="icon">
+            <Button type="submit" disabled={isLoading || !input.trim()} size="icon" className="bg-gradient-to-r from-primary to-primary-glow hover:shadow-glow">
               {isLoading ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
               ) : (
@@ -422,7 +488,7 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
             </Button>
           </form>
           <p className="mt-2 text-xs text-muted-foreground">
-            This AI provides general information only. Consult a licensed attorney for specific legal advice.
+            🎤 Voice-enabled • 🌍 Multilingual • ⚖️ Professional legal guidance • This AI provides general information only.
           </p>
           
           {showChecklist && (
