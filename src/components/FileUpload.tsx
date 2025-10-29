@@ -15,9 +15,10 @@ const FileUpload = ({ onFileSelect, onFileRemove, selectedFile, disabled }: File
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Check file size (20MB limit)
-      if (file.size > 20 * 1024 * 1024) {
-        alert("File size must be less than 20MB");
+      // Check file size (50KB limit for optimal AI processing)
+      const maxSize = 50 * 1024; // 50KB
+      if (file.size > maxSize) {
+        alert("File size must be less than 50KB for optimal AI analysis. Please upload a smaller document or extract key sections.");
         return;
       }
       onFileSelect(file);

@@ -19,7 +19,13 @@ serve(async (req) => {
     let systemContent = "You are LexAI, an expert legal and compliance assistant. You are fluent in multiple languages and can respond in the same language as the user's query. Provide accurate, professional legal guidance while being clear and accessible. Always remind users to consult with licensed attorneys for specific legal matters. Focus on:\n- Explaining legal concepts clearly in any language\n- Identifying compliance requirements\n- Analyzing legal documents\n- Providing research starting points\n- Highlighting potential legal issues\n\nBe concise, professional, and helpful. Detect the user's language and respond in that language.";
     
     if (documentContext) {
-      systemContent += `\n\nThe user has uploaded a document named "${documentContext.name}". Here is the content:\n\n${documentContext.content}\n\nPlease analyze this document and provide insights based on the user's questions.`;
+      // Limit document content to 50KB to prevent exceeding API limits
+      const maxDocLength = 50000;
+      const truncatedContent = documentContext.content.length > maxDocLength 
+        ? documentContext.content.substring(0, maxDocLength) + "\n\n[Document truncated due to size. Showing first 50KB]"
+        : documentContext.content;
+      
+      systemContent += `\n\nThe user has uploaded a document named "${documentContext.name}". Here is the content:\n\n${truncatedContent}\n\nPlease analyze this document and provide insights based on the user's questions.`;
     }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -42,6 +48,9 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error("AI gateway error:", response.status, errorText);
+      
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limits exceeded, please try again later." }), {
           status: 429,
@@ -54,9 +63,16 @@ serve(async (req) => {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      const t = await response.text();
-      console.error("AI gateway error:", response.status, t);
-      return new Response(JSON.stringify({ error: "AI gateway error" }), {
+      if (response.status === 400 && errorText.includes("exceeds")) {
+        return new Response(JSON.stringify({ error: "Document too large. Please upload a smaller document (max 50KB)." }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      
+      return new Response(JSON.stringify({ 
+        error: "AI service error. Please try with a shorter message or smaller document."
+      }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
