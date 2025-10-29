@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Loader2, ArrowLeft, FileText } from "lucide-react";
+import { Send, Loader2, ArrowLeft, FileText, ClipboardList, FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import FileUpload from "./FileUpload";
+import ComplianceChecklist from "./ComplianceChecklist";
 
 interface Message {
   role: "user" | "assistant";
@@ -22,6 +23,8 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [documentContent, setDocumentContent] = useState<string>("");
+  const [showChecklist, setShowChecklist] = useState(false);
+  const [checklistItems, setChecklistItems] = useState<any[]>([]);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -53,6 +56,127 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
   const handleFileRemove = () => {
     setSelectedFile(null);
     setDocumentContent("");
+  };
+
+  const generateComplianceChecklist = () => {
+    const items = [
+      {
+        id: "1",
+        title: "Data Privacy Compliance",
+        description: "Ensure GDPR/CCPA compliance for user data handling",
+        checked: false
+      },
+      {
+        id: "2",
+        title: "Contract Review",
+        description: "Review all contractual obligations and terms",
+        checked: false
+      },
+      {
+        id: "3",
+        title: "Risk Assessment",
+        description: "Identify and document potential legal risks",
+        checked: false
+      },
+      {
+        id: "4",
+        title: "Regulatory Compliance",
+        description: "Verify compliance with industry regulations",
+        checked: false
+      },
+      {
+        id: "5",
+        title: "Documentation",
+        description: "Ensure all necessary legal documents are in place",
+        checked: false
+      }
+    ];
+
+    setChecklistItems(items);
+    setShowChecklist(true);
+
+    // Send to webhook
+    fetch("https://manoj9990.app.n8n.cloud/webhook-test/7fa30d59-edcb-4902-8ef1-9b6e2b1ba8cb", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "checklist_generated",
+        items: items,
+        timestamp: new Date().toISOString()
+      })
+    }).catch(err => console.error("Webhook error:", err));
+
+    toast({
+      title: "Checklist Generated",
+      description: "Your compliance checklist is ready.",
+    });
+  };
+
+  const generateReport = async () => {
+    try {
+      const { jsPDF } = await import('jspdf');
+      const doc = new jsPDF();
+      
+      doc.setFontSize(20);
+      doc.text("Legal Analysis Report", 20, 20);
+      
+      doc.setFontSize(12);
+      doc.text(`Generated: ${new Date().toLocaleDateString()}`, 20, 35);
+      
+      doc.setFontSize(10);
+      let yPosition = 50;
+      
+      messages.forEach((msg) => {
+        const prefix = msg.role === "user" ? "User: " : "LexAI: ";
+        const text = prefix + msg.content;
+        const splitText = doc.splitTextToSize(text, 170);
+        
+        doc.text(splitText, 20, yPosition);
+        yPosition += (splitText.length * 7) + 5;
+        
+        if (yPosition > 270) {
+          doc.addPage();
+          yPosition = 20;
+        }
+      });
+      
+      doc.save("legal-analysis-report.pdf");
+
+      // Save to localStorage
+      const report = {
+        id: Date.now().toString(),
+        title: "Legal Analysis Report",
+        type: "Analysis",
+        date: new Date().toLocaleDateString(),
+        summary: messages[messages.length - 1]?.content.substring(0, 100) + "...",
+        content: messages.map(m => `${m.role}: ${m.content}`).join("\n\n")
+      };
+
+      const existingReports = JSON.parse(localStorage.getItem('lexai_reports') || '[]');
+      localStorage.setItem('lexai_reports', JSON.stringify([report, ...existingReports]));
+
+      // Send to webhook
+      fetch("https://manoj9990.app.n8n.cloud/webhook-test/7fa30d59-edcb-4902-8ef1-9b6e2b1ba8cb", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "report_generated",
+          report: report,
+          timestamp: new Date().toISOString()
+        })
+      }).catch(err => console.error("Webhook error:", err));
+      
+      toast({
+        title: "Report Generated",
+        description: "Your legal analysis report has been downloaded and saved.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to generate report",
+        variant: "destructive",
+      });
+    }
   };
 
   const streamChat = async (userMessage: Message) => {
@@ -184,18 +308,38 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
     <div className="flex min-h-screen flex-col bg-background">
       {/* Header */}
       <header className="border-b bg-card shadow-soft">
-        <div className="container mx-auto flex h-16 items-center gap-4 px-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onBack}
-            className="rounded-full"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h2 className="text-lg font-semibold text-foreground">LexAI Assistant</h2>
-            <p className="text-sm text-muted-foreground">Legal & Compliance Guidance</p>
+        <div className="container mx-auto flex h-16 items-center justify-between px-4">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onBack}
+              className="rounded-full"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <h2 className="text-lg font-semibold text-foreground">LexAI Assistant</h2>
+              <p className="text-sm text-muted-foreground">Legal & Compliance Guidance</p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={generateComplianceChecklist}
+            >
+              <ClipboardList className="h-4 w-4 mr-2" />
+              Checklist
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={generateReport}
+            >
+              <FileDown className="h-4 w-4 mr-2" />
+              Report
+            </Button>
           </div>
         </div>
       </header>
@@ -280,6 +424,14 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
           <p className="mt-2 text-xs text-muted-foreground">
             This AI provides general information only. Consult a licensed attorney for specific legal advice.
           </p>
+          
+          {showChecklist && (
+            <ComplianceChecklist
+              items={checklistItems}
+              title="Compliance Checklist"
+              onGeneratePDF={() => {}}
+            />
+          )}
         </div>
       </div>
     </div>

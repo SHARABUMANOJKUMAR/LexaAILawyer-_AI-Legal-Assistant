@@ -1,4 +1,4 @@
-import { Scale, Shield, FileText, MessageSquare, Upload, CheckSquare, Library, Bell } from "lucide-react";
+import { Scale, Shield, FileText, MessageSquare, Upload, CheckSquare, Library, Bell, ClipboardList } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -59,6 +59,16 @@ const Hero = ({ onGetStarted }: HeroProps) => {
             >
               View Templates
               <Library className="ml-2 h-5 w-5" />
+            </Button>
+            
+            <Button
+              onClick={() => navigate('/reports')}
+              variant="outline"
+              size="lg"
+              className="h-14 border-2 border-white/30 bg-white/10 px-8 text-lg font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/20"
+            >
+              <ClipboardList className="mr-2 h-5 w-5" />
+              Reports
             </Button>
           </div>
           
