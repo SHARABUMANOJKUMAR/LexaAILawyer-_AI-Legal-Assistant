@@ -27,32 +27,9 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
   const [showChecklist, setShowChecklist] = useState(false);
   const [checklistItems, setChecklistItems] = useState<any[]>([]);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [voiceFeaturesEnabled, setVoiceFeaturesEnabled] = useState(false);
+  const voiceFeaturesEnabled = false; // Disabled until valid API keys are configured
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
-
-  // Check if voice features are available
-  useEffect(() => {
-    const checkVoiceFeatures = async () => {
-      try {
-        const TTS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/text-to-speech`;
-        const response = await fetch(TTS_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          body: JSON.stringify({ text: "test", voice: "Sarah" }),
-        });
-        
-        setVoiceFeaturesEnabled(response.ok || response.status === 402);
-      } catch {
-        setVoiceFeaturesEnabled(false);
-      }
-    };
-    
-    checkVoiceFeatures();
-  }, []);
 
   const scrollToBottom = () => {
     if (scrollAreaRef.current) {
@@ -535,7 +512,7 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
             </Button>
           </form>
           <p className="mt-2 text-xs text-muted-foreground">
-            {voiceFeaturesEnabled ? "🎤 Voice-enabled • " : ""}🌍 Multilingual • ⚖️ Professional legal guidance • This AI provides general information only.
+            🌍 Multilingual • ⚖️ Professional legal guidance • 📄 Document analysis • This AI provides general information only.
           </p>
           
           {showChecklist && (
