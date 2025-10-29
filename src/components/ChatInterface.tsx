@@ -325,10 +325,16 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
     } catch (error) {
       console.error("TTS error:", error);
       setIsSpeaking(false);
+      
+      const errorMessage = error instanceof Error ? error.message : "";
+      
       toast({
-        title: "Speech Error",
-        description: "Failed to generate speech. Please try again.",
+        title: "Speech Generation Issue",
+        description: errorMessage.includes("quota") || errorMessage.includes("credits")
+          ? "⚠️ ElevenLabs credits needed. Voice features require API credits. You can still read the text response!"
+          : "Could not generate speech. You can read the text response instead.",
         variant: "destructive",
+        duration: 5000,
       });
     }
   };

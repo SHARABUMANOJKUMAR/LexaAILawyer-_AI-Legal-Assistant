@@ -73,6 +73,12 @@ const VoiceRecorder = ({ onTranscription, disabled }: VoiceRecorderProps) => {
         });
 
         if (!response.ok) {
+          const errorData = await response.json();
+          
+          if (response.status === 402 || errorData.code === "quota_exceeded") {
+            throw new Error("OpenAI quota exceeded. Please add credits to your OpenAI account.");
+          }
+          
           throw new Error("Failed to transcribe audio");
         }
 
@@ -86,10 +92,16 @@ const VoiceRecorder = ({ onTranscription, disabled }: VoiceRecorderProps) => {
       };
     } catch (error) {
       console.error("Error processing audio:", error);
+      
+      const errorMessage = error instanceof Error ? error.message : "Failed to process audio";
+      
       toast({
-        title: "Processing Error",
-        description: "Failed to process audio. Please try again.",
+        title: "Voice Recording Issue",
+        description: errorMessage.includes("quota") 
+          ? "⚠️ OpenAI credits needed. Please add credits at platform.openai.com or type your message instead."
+          : "Failed to process audio. Please try typing your message instead.",
         variant: "destructive",
+        duration: 6000,
       });
     } finally {
       setIsProcessing(false);

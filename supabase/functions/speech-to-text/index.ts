@@ -64,8 +64,22 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
-      const error = await response.text();
-      console.error("OpenAI error:", error);
+      const errorData = await response.json().catch(() => ({}));
+      console.error("OpenAI error:", JSON.stringify(errorData, null, 2));
+      
+      if (response.status === 429 || errorData.error?.code === "insufficient_quota") {
+        return new Response(
+          JSON.stringify({ 
+            error: "OpenAI quota exceeded. Please add credits to your OpenAI account at https://platform.openai.com/account/billing",
+            code: "quota_exceeded"
+          }),
+          { 
+            status: 402,
+            headers: { ...corsHeaders, "Content-Type": "application/json" } 
+          }
+        );
+      }
+      
       throw new Error("Failed to transcribe audio");
     }
 
