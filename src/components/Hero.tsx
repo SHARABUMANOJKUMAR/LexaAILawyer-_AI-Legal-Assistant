@@ -1,11 +1,14 @@
-import { Scale, Shield, FileText } from "lucide-react";
+import { Scale, Shield, FileText, MessageSquare, Upload, CheckSquare, Library, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 interface HeroProps {
   onGetStarted: () => void;
 }
 
 const Hero = ({ onGetStarted }: HeroProps) => {
+  const navigate = useNavigate();
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Gradient Background */}
@@ -49,21 +52,24 @@ const Hero = ({ onGetStarted }: HeroProps) => {
             </Button>
             
             <Button
+              onClick={() => navigate('/templates')}
               variant="outline"
               size="lg"
               className="h-14 border-2 border-white/30 bg-white/10 px-8 text-lg font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/20"
             >
-              Learn More
-              <FileText className="ml-2 h-5 w-5" />
+              View Templates
+              <Library className="ml-2 h-5 w-5" />
             </Button>
           </div>
           
           {/* Features */}
-          <div className="mt-20 grid gap-8 sm:grid-cols-3">
+          <div className="mt-20 grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
             {[
-              { icon: Scale, title: "Legal Research", desc: "Instant access to legal precedents and statutes" },
-              { icon: Shield, title: "Compliance Check", desc: "Ensure your business meets all requirements" },
-              { icon: FileText, title: "Document Review", desc: "AI-powered analysis of contracts and agreements" },
+              { icon: MessageSquare, title: "AI Legal Q&A", desc: "Get instant answers to legal questions on contracts, HR laws, privacy & more" },
+              { icon: Upload, title: "Document Analysis", desc: "Upload contracts for auto legal summary & risk detection" },
+              { icon: CheckSquare, title: "Compliance Checklists", desc: "Generate personalized compliance requirements for your business" },
+              { icon: Library, title: "Legal Templates", desc: "Access NDAs, policies, agreements & more ready-to-use templates" },
+              { icon: Bell, title: "Regulation Alerts", desc: "Stay updated with the latest legal & compliance changes" },
             ].map((feature, idx) => (
               <div
                 key={idx}

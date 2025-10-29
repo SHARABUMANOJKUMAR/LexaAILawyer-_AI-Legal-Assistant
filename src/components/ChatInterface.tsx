@@ -1,13 +1,15 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Loader2, ArrowLeft } from "lucide-react";
+import { Send, Loader2, ArrowLeft, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
+import FileUpload from "./FileUpload";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
+  documentName?: string;
 }
 
 interface ChatInterfaceProps {
@@ -18,6 +20,8 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [documentContent, setDocumentContent] = useState<string>("");
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -34,17 +38,45 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
     scrollToBottom();
   }, [messages]);
 
+  const handleFileSelect = async (file: File) => {
+    setSelectedFile(file);
+    
+    // Read file content
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const content = e.target?.result as string;
+      setDocumentContent(content);
+    };
+    reader.readAsText(file);
+  };
+
+  const handleFileRemove = () => {
+    setSelectedFile(null);
+    setDocumentContent("");
+  };
+
   const streamChat = async (userMessage: Message) => {
     const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/legal-chat`;
     
     try {
+      const payload: any = { 
+        messages: [...messages, userMessage]
+      };
+      
+      if (documentContent) {
+        payload.documentContext = {
+          name: selectedFile?.name,
+          content: documentContent
+        };
+      }
+
       const resp = await fetch(CHAT_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ messages: [...messages, userMessage] }),
+        body: JSON.stringify(payload),
       });
 
       if (!resp.ok) {
@@ -132,10 +164,18 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 
-    const userMessage: Message = { role: "user", content: input.trim() };
+    const userMessage: Message = { 
+      role: "user", 
+      content: input.trim(),
+      documentName: selectedFile?.name
+    };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
+    
+    // Clear file after sending
+    setSelectedFile(null);
+    setDocumentContent("");
 
     await streamChat(userMessage);
   };
@@ -190,6 +230,12 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
                       : "bg-muted text-foreground"
                   }`}
                 >
+                  {msg.documentName && (
+                    <div className="mb-2 flex items-center gap-2 text-xs opacity-80">
+                      <FileText className="h-3 w-3" />
+                      <span>{msg.documentName}</span>
+                    </div>
+                  )}
                   <p className="whitespace-pre-wrap text-sm leading-relaxed">{msg.content}</p>
                 </div>
               </div>
@@ -210,10 +256,16 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
       <div className="border-t bg-card shadow-soft">
         <div className="container mx-auto max-w-4xl px-4 py-4">
           <form onSubmit={handleSubmit} className="flex gap-2">
+            <FileUpload
+              onFileSelect={handleFileSelect}
+              onFileRemove={handleFileRemove}
+              selectedFile={selectedFile}
+              disabled={isLoading}
+            />
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask a legal question..."
+              placeholder="Ask a legal question or upload a document..."
               disabled={isLoading}
               className="flex-1"
             />
