@@ -1,73 +1,100 @@
-# Welcome to your Lovable project
+# ⚖️ Lexa AI Lawyer  
+**Smart Legal Assistant by ShivaShakti Technologies**
 
-## Project info
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Deployed](https://img.shields.io/badge/Live%20Demo-Open-blue?logo=vercel)](https://lexaailawyer.lovable.app/)
+[![AI Powered](https://img.shields.io/badge/Powered%20By-AI⚡-purple)](https://openai.com)
 
-**URL**: https://lovable.dev/projects/c46aff20-7798-49bd-a966-db0056ec3164
+---
 
-## How can I edit this code?
+## 🧠 About Lexa AI Lawyer
 
-There are several ways of editing your application.
+**Lexa AI Lawyer** is an intelligent legal assistant built to simplify law-related queries using **AI + Automation**.  
+Users can get instant, accurate legal information and document assistance — anytime, anywhere.
 
-**Use Lovable**
+> “Empowering everyone with accessible and affordable legal knowledge.” ⚖️  
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/c46aff20-7798-49bd-a966-db0056ec3164) and start prompting.
+---
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🚀 Features
 
-**Use your preferred IDE**
+✅ AI-Powered Legal Q&A  
+✅ Real-time Legal Document Insights  
+✅ Multilingual Support  
+✅ Voice-to-Text Query Input  
+✅ Clean, Modern Lovable Frontend  
+✅ Integrated with Automation Workflows (n8n / Firebase)
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+---
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 🌍 Live Project  
+🔗 **Deployed Link:** [https://lexaailawyer.lovable.app/](https://lexaailawyer.lovable.app/)
 
-Follow these steps:
+---
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## 🧩 Tech Stack
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+| Layer | Technology |
+|:------|:------------|
+| **Frontend** | HTML, CSS, JavaScript, Lovable AI |
+| **Backend** | Flask / Firebase Integration |
+| **AI Models** | OpenAI, LangChain, Custom Prompt Workflows |
+| **Automation** | n8n Workflows, Google Sheets, Gmail API |
+| **Database** | Firebase / MongoDB |
+| **Hosting** | Lovable Cloud |
 
-# Step 3: Install the necessary dependencies.
-npm i
+---
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+## 🛠️ Setup (For Developers)
 
-**Edit a file directly in GitHub**
+```bash
+# Clone the repository
+git clone https://github.com/SHARABUMANOJKUMAR/LexaLawyerAI
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Navigate to project
+cd lexa-ai-lawyer
 
-**Use GitHub Codespaces**
+# Install dependencies
+pip install -r requirements.txt
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+# Run locally
+flask run
 
-## What technologies are used for this project?
+---
 
-This project is built with:
+🧑‍⚖️ Usage
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Visit the live app 👉 Lexa AI Lawyer
 
-## How can I deploy this project?
+Enter your legal question or document request
 
-Simply open [Lovable](https://lovable.dev/projects/c46aff20-7798-49bd-a966-db0056ec3164) and click on Share -> Publish.
+Get instant answers and document guidance 🧾
 
-## Can I connect a custom domain to my Lovable project?
+🤝 Contributing
 
-Yes, you can!
+We welcome contributions!
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Fork the repo
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Create a new branch
+
+Submit a pull request
+
+🪪 License
+
+This project is licensed under the MIT License
+ © 2025 ShivaShakti Technologies
+
+💌 Connect
+
+🌐 Website: https://lexaailawyer.lovable.app/
+
+💼 Company: ShivaShakti Technologies
+📧 Contact: support@shivashakti.tech
+
+⚡ "Lexa AI Lawyer — Justice meets Artificial Intelligence."
+
+
+---
+
+Would you like me to include **animated badges** (like “💬 Chat with AI”, “Made with ❤️ in India”) and a **preview image/banner** at the top of README for branding?
