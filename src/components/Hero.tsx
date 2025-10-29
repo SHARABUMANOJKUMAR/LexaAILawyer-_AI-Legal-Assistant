@@ -1,6 +1,7 @@
 import { Scale, Shield, FileText, MessageSquare, Upload, CheckSquare, Library, Bell, ClipboardList } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import Footer from "@/components/Footer";
 
 interface HeroProps {
   onGetStarted: () => void;
@@ -93,6 +94,8 @@ const Hero = ({ onGetStarted }: HeroProps) => {
           </div>
         </div>
       </div>
+      
+      <Footer />
     </section>
   );
 };

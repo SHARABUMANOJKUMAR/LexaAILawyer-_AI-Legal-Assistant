@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import FileUpload from "./FileUpload";
 import ComplianceChecklist from "./ComplianceChecklist";
 import VoiceRecorder from "./VoiceRecorder";
+import Footer from "@/components/Footer";
 
 interface Message {
   role: "user" | "assistant";
@@ -524,6 +525,8 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
           )}
         </div>
       </div>
+      
+      <Footer />
     </div>
   );
 };
