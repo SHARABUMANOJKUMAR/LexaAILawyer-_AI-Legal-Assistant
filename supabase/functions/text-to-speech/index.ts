@@ -49,9 +49,36 @@ serve(async (req) => {
     );
 
     if (!response.ok) {
-      const error = await response.text();
-      console.error("ElevenLabs error:", error);
-      throw new Error("Failed to generate speech");
+      const errorData = await response.json().catch(() => ({}));
+      console.error("ElevenLabs error:", response.status, JSON.stringify(errorData, null, 2));
+      
+      if (response.status === 401) {
+        return new Response(
+          JSON.stringify({ 
+            error: "Invalid ElevenLabs API key. Please check your API key at elevenlabs.io",
+            code: "invalid_api_key"
+          }),
+          {
+            status: 401,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
+      
+      if (response.status === 429 || errorData.detail?.status === "quota_exceeded") {
+        return new Response(
+          JSON.stringify({ 
+            error: "ElevenLabs quota exceeded. Please add credits to your ElevenLabs account.",
+            code: "quota_exceeded"
+          }),
+          {
+            status: 402,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
+      
+      throw new Error(`ElevenLabs API error: ${response.status}`);
     }
 
     const arrayBuffer = await response.arrayBuffer();

@@ -300,10 +300,22 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ text, voice: "Sarah" }),
+        body: JSON.stringify({ text: text.substring(0, 500), voice: "Sarah" }), // Limit text length
       });
 
-      if (!response.ok) throw new Error("Failed to generate speech");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+        
+        if (response.status === 401) {
+          throw new Error("ElevenLabs API key is invalid or not configured");
+        }
+        
+        if (response.status === 402 || errorData.code === "quota_exceeded") {
+          throw new Error("ElevenLabs quota exceeded");
+        }
+        
+        throw new Error(errorData.error || "Failed to generate speech");
+      }
 
       const data = await response.json();
       const audioData = atob(data.audioContent);
@@ -329,10 +341,12 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
       const errorMessage = error instanceof Error ? error.message : "";
       
       toast({
-        title: "Speech Generation Issue",
-        description: errorMessage.includes("quota") || errorMessage.includes("credits")
-          ? "⚠️ ElevenLabs credits needed. Voice features require API credits. You can still read the text response!"
-          : "Could not generate speech. You can read the text response instead.",
+        title: "Voice Feature Unavailable",
+        description: errorMessage.includes("quota") 
+          ? "⚠️ ElevenLabs credits needed. Add credits at elevenlabs.io to enable voice." 
+          : errorMessage.includes("API key")
+          ? "⚠️ ElevenLabs API key not configured. Voice features are optional - you can still read the response!"
+          : "Voice generation failed. You can read the text response instead.",
         variant: "destructive",
         duration: 5000,
       });
