@@ -28,7 +28,7 @@ const Hero = ({ onGetStarted }: HeroProps) => {
           
           {/* Main Heading */}
           <h1 className="mb-6 text-5xl font-bold leading-tight text-white md:text-7xl">
-            Your AI Legal &
+            LexaAI Legal &
             <br />
             <span className="bg-gradient-to-r from-accent to-accent-glow bg-clip-text text-transparent">
               Compliance Assistant

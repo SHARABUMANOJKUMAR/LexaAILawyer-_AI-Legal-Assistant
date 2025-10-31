@@ -48,13 +48,34 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
   const handleFileSelect = async (file: File) => {
     setSelectedFile(file);
     
-    // Read file content
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const content = e.target?.result as string;
-      setDocumentContent(content);
-    };
-    reader.readAsText(file);
+    try {
+      // Read file content
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const content = e.target?.result as string;
+        setDocumentContent(content);
+        
+        // Show toast that document is ready
+        toast({
+          title: "Document Uploaded",
+          description: `${file.name} is ready for analysis. Ask me anything about it!`,
+        });
+      };
+      reader.onerror = () => {
+        toast({
+          title: "Error Reading File",
+          description: "Failed to read the document. Please try again.",
+          variant: "destructive",
+        });
+      };
+      reader.readAsText(file);
+    } catch (error) {
+      toast({
+        title: "Upload Error",
+        description: "Failed to upload document. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleFileRemove = () => {
@@ -427,7 +448,7 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
               </div>
               <h3 className="mb-2 text-xl font-semibold">How can I assist you today?</h3>
               <p className="max-w-md text-muted-foreground">
-                Ask me about legal concepts, compliance requirements, document analysis, or general legal guidance.
+                Ask me about legal concepts, compliance requirements, document analysis, or general legal guidance. Upload a document for AI-powered analysis!
               </p>
             </div>
           )}
