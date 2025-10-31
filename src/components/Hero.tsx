@@ -2,6 +2,9 @@ import { Scale, Shield, FileText, MessageSquare, Upload, CheckSquare, Library, B
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import Footer from "@/components/Footer";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useLanguage } from "@/contexts/LanguageContext";
+import profileLogo from "@/assets/profile-logo.png";
 
 interface HeroProps {
   onGetStarted: () => void;
@@ -9,6 +12,7 @@ interface HeroProps {
 
 const Hero = ({ onGetStarted }: HeroProps) => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
@@ -18,8 +22,25 @@ const Hero = ({ onGetStarted }: HeroProps) => {
       {/* Animated Grid Pattern */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:72px_72px] [mask-image:radial-gradient(ellipse_at_center,black_50%,transparent_100%)]" />
       
+      {/* Language Switcher */}
+      <div className="absolute top-6 right-6 z-20">
+        <LanguageSwitcher />
+      </div>
+      
       <div className="container relative z-10 mx-auto px-4">
         <div className="mx-auto max-w-4xl text-center">
+          {/* Logo */}
+          <div className="mb-8 flex justify-center">
+            <div className="relative">
+              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-accent to-accent-glow opacity-50 blur-2xl" />
+              <img 
+                src={profileLogo} 
+                alt="LexaAI Logo" 
+                className="relative h-32 w-32 rounded-full border-4 border-white/20 object-cover shadow-strong"
+              />
+            </div>
+          </div>
+          
           {/* Badge */}
           <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm text-white backdrop-blur-sm">
             <Shield className="h-4 w-4" />
@@ -28,17 +49,16 @@ const Hero = ({ onGetStarted }: HeroProps) => {
           
           {/* Main Heading */}
           <h1 className="mb-6 text-5xl font-bold leading-tight text-white md:text-7xl">
-            LexaAI Legal &
+            {t.hero.title}
             <br />
             <span className="bg-gradient-to-r from-accent to-accent-glow bg-clip-text text-transparent">
-              Compliance Assistant
+              {t.hero.subtitle}
             </span>
           </h1>
           
           {/* Subheading */}
           <p className="mb-12 text-xl text-white/90 md:text-2xl">
-            Navigate complex legal matters with confidence. Get instant guidance, 
-            document analysis, and compliance insights powered by cutting-edge AI.
+            {t.hero.description}
           </p>
           
           {/* CTA Buttons */}
@@ -48,7 +68,7 @@ const Hero = ({ onGetStarted }: HeroProps) => {
               size="lg"
               className="group h-14 bg-white px-8 text-lg font-semibold text-primary shadow-strong transition-all hover:scale-105 hover:shadow-[0_20px_60px_-12px_rgba(251,191,36,0.4)]"
             >
-              Start Consultation
+              {t.hero.getStarted}
               <Scale className="ml-2 h-5 w-5 transition-transform group-hover:rotate-12" />
             </Button>
             
@@ -58,7 +78,7 @@ const Hero = ({ onGetStarted }: HeroProps) => {
               size="lg"
               className="h-14 border-2 border-white/30 bg-white/10 px-8 text-lg font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/20"
             >
-              View Templates
+              {t.hero.learnMore}
               <Library className="ml-2 h-5 w-5" />
             </Button>
             
@@ -69,7 +89,7 @@ const Hero = ({ onGetStarted }: HeroProps) => {
               className="h-14 border-2 border-white/30 bg-white/10 px-8 text-lg font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/20"
             >
               <ClipboardList className="mr-2 h-5 w-5" />
-              Reports
+              {t.reports.title}
             </Button>
           </div>
           
